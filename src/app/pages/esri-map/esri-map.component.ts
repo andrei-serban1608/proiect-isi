@@ -52,7 +52,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
   trailheadsLayer: esri.FeatureLayer;
 
   zoom = 10;
-  center: Array<number> = [-118.73682450024377, 34.07817583063242];
+  center: Array<number> = [26.1025, 44.4268];
   basemap = "streets-vector";
   loaded = false;
   directionsElement: any;
@@ -108,7 +108,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
       console.log("ArcGIS map loaded");
       this.addRouting();
 
-      // this.task2();
+      this.task2();
       this.task3();
 
       return this.view;
