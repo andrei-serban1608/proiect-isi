@@ -77,7 +77,8 @@ export class EsriMapComponent implements OnInit, OnDestroy {
       };
       this.map = new WebMap(mapProperties);
 
-      this.addFeatureLayers();
+      const addresses = ["FARMACIA AIS PHARM 01, CALEA RAHOVEI, NR. 323"];
+      this.addFeatureLayers(addresses);
       this.addGraphicsLayer();
 
       const mapViewProperties = {
@@ -91,8 +92,8 @@ export class EsriMapComponent implements OnInit, OnDestroy {
       this.view.on('click', (event: any) => {
         console.log(event);
         const point = this.view.toMap(event);
-        this.addPointToMap(point.latitude, point.longitude);
-        this.savePointToFirebase(point.latitude, point.longitude);
+        //this.addPointToMap(point.latitude, point.longitude);
+        //this.savePointToFirebase(point.latitude, point.longitude);
       });
 
       this.view.on('resize', () => {
@@ -110,6 +111,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
 
       this.task2();
       this.task3();
+      
 
       return this.view;
     } catch (error) {
@@ -316,12 +318,85 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     });
   }
 
-  addFeatureLayers() {
-    this.trailheadsLayer = new FeatureLayer({
-      url: "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0",
-      outFields: ['*']
-    });
-    this.map.add(this.trailheadsLayer);
+  async addFeatureLayers(addresses: string[]) {
+    const graphicsLayer = new GraphicsLayer();
+    this.map.add(graphicsLayer);
+
+    const geocodeUrl = "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+
+    // Path to the CSV file in the assets folder
+    const csvFilePath = 'assets/sector5.csv';
+
+    try {
+      // Fetch the CSV file content
+      const response = await fetch(csvFilePath);
+      if (!response.ok) {
+        throw new Error(`Failed to load CSV file: ${response.statusText}`);
+      }
+
+      const csvText = await response.text();
+
+      // Parse CSV text and split it into rows
+      const rows = csvText.split('\n').map(row => row.trim()).filter(row => row);
+
+      // Extract headers to get field positions
+      const headers = rows[0].split(','); // Assuming CSV is comma-separated
+      const denumireIndex = headers.indexOf("DENUMIRE");
+      const adresaIndex = headers.indexOf("ADRESA");
+      const localitateINDEX = headers.indexOf("LOCALITATE");
+
+      if (denumireIndex === -1 || adresaIndex === -1) {
+        throw new Error("CSV must include 'DENUMIRE' and 'ADRESA' columns.");
+      }
+
+      // Process each row (skip the header row)
+      for (let i = 1; i < rows.length; i++) {
+        const fields = rows[i].split(',');
+        if (fields.length <= Math.max(denumireIndex, adresaIndex)) continue;
+
+        const denumire = fields[denumireIndex].trim();
+        const adresa = fields[adresaIndex];
+        const localitate = fields[localitateINDEX].trim();
+        const fullAddress = `${denumire}, ${adresa}, ${localitate}`;
+
+        try {
+          const results = await locator.addressToLocations(geocodeUrl, {
+            address: { SingleLine: fullAddress },
+            maxLocations: 1,
+            outFields: ["*"]
+          });
+
+          if (results.length > 0) {
+            const location = results[0].location;
+
+            const point = new Point({
+              longitude: location.x,
+              latitude: location.y
+            });
+
+            const pointGraphic = new Graphic({
+              geometry: point,
+              symbol: {
+                color: [226, 119, 40] // Orange color
+              },
+              attributes: {
+                Address: fullAddress
+              },
+              popupTemplate: {
+                title: "Location",
+                content: "{Address}"
+              }
+            });
+
+            graphicsLayer.add(pointGraphic);
+          }
+        } catch (geocodeError) {
+          console.error(`Failed to geocode address: ${fullAddress}`, geocodeError);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading or processing CSV file:", error);
+    }
 
     const trailsLayer = new FeatureLayer({
       url: "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trails/FeatureServer/0"
