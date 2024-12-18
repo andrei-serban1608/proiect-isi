@@ -63,6 +63,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     this.initializeMap().then(() => {
       this.loaded = this.view.ready;
       this.mapLoadedEvent.emit(true);
+      this.addGeolocationPin();
     });
     this.loadPointsFromFirebase();
     this.updateUserPosition();
@@ -201,6 +202,49 @@ export class EsriMapComponent implements OnInit, OnDestroy {
 
   });
   graphicsLayer.add(polygonGraphic);
+  }
+
+  addGeolocationPin(): void {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+  
+          console.log(`Geolocation: ${latitude}, ${longitude}`);
+  
+          // Add a pin at the user's location
+          const userLocationPoint = new Point({
+            longitude: longitude,
+            latitude: latitude
+          });
+  
+          const userLocationGraphic = new Graphic({
+            geometry: userLocationPoint,
+            symbol: new SimpleMarkerSymbol({
+              color: [0, 0, 255], // Blue color
+              size: 10,
+              outline: {
+                color: [255, 255, 255], // White outline
+                width: 2
+              }
+            }),
+            popupTemplate: {
+              title: "Your Location",
+              content: `Latitude: ${latitude}, Longitude: ${longitude}`
+            }
+          });
+  
+          this.graphicsLayer.add(userLocationGraphic);
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          alert("Unable to retrieve your location. Please check your browser settings.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
   }
 
   findPlaces(category, pt) {
