@@ -276,6 +276,8 @@ export class EsriMapComponent implements OnInit, OnDestroy {
       const denumireIndex = headers.indexOf("DENUMIRE");
       const adresaIndex = headers.indexOf("ADRESA");
       const localitateINDEX = headers.indexOf("LOCALITATE");
+      const observatiiINDEX = headers.indexOf("OBSERVATII");
+      const structuraINDEX = headers.indexOf("IN STRUCTURA");
 
       if (denumireIndex === -1 || adresaIndex === -1) {
         throw new Error("CSV must include 'DENUMIRE' and 'ADRESA' columns.");
@@ -289,6 +291,8 @@ export class EsriMapComponent implements OnInit, OnDestroy {
         const denumire = fields[denumireIndex].trim();
         const adresa = fields[adresaIndex];
         const localitate = fields[localitateINDEX].trim();
+        const structura = fields[structuraINDEX].trim();
+        const observatii = fields[observatiiINDEX].trim();
         const fullAddress = `${denumire}, ${adresa}, ${localitate}`;
 
         try {
@@ -312,11 +316,14 @@ export class EsriMapComponent implements OnInit, OnDestroy {
                 color: [226, 119, 40] // Orange color
               },
               attributes: {
-                Address: fullAddress
+                Address: adresa,
+                Location : denumire,
+                Structure: structura,
+                Observations: observatii
               },
               popupTemplate: {
-                title: "Location",
-                content: "{Address}"
+                title: "{Location}",
+                content: "Adresa: {Address}<br>In structura: {Structure} <br>Observatii: {Observations}"
               }
             });
 
