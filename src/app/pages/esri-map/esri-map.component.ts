@@ -463,49 +463,65 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     this.graphicsLayerRoutes = new GraphicsLayer();
     this.map.add(this.graphicsLayerRoutes);
   }
-
+  
   addRouting() {
     const routeUrl = "https://route-api.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World";
-    this.view.on("click", (event) => {
-      this.view.hitTest(event).then((elem: esri.HitTestResult) => {
-        if (elem && elem.results && elem.results.length > 0) {
-          let point: esri.Point = elem.results.find(e => e.layer === this.trailheadsLayer)?.mapPoint;
-          if (point) {
-            console.log("get selected point: ", elem, point);
-            if (this.graphicsLayerUserPoints.graphics.length === 0) {
-              this.addPoint(point.latitude, point.longitude);
-            } else if (this.graphicsLayerUserPoints.graphics.length === 1) {
-              this.addPoint(point.latitude, point.longitude);
-              this.calculateRoute(routeUrl);
-            } else {
-              this.removePoints();
-            }
+  
+    this.view.on("click", async (event) => {
+      const clickedPoint = this.view.toMap(event); // Get the map coordinates of the click
+      if (!clickedPoint) return;
+  
+      // Clear previous routes and points
+      this.removeRoutes();
+      this.removePoints();
+  
+      // Add the destination point
+      this.addPoint(clickedPoint.latitude, clickedPoint.longitude);
+  
+      // Get user's current location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const userLatitude = position.coords.latitude;
+            const userLongitude = position.coords.longitude;
+  
+            // Add user's location as a point
+            this.addPoint(userLatitude, userLongitude);
+  
+            // Calculate the route
+            await this.calculateRoute(routeUrl);
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            alert("Unable to retrieve your location. Please check your browser settings.");
           }
-        }
-      });
+        );
+      } else {
+        alert("Geolocation is not supported by this browser.");
+      }
     });
   }
 
   addPoint(lat: number, lng: number) {
-    let point = new Point({
+    const point = new Point({
       longitude: lng,
       latitude: lat
     });
-
+  
     const simpleMarkerSymbol = {
       type: "simple-marker",
-      color: [226, 119, 40],  // Orange
+      color: [226, 119, 40],  // Orange for destination
       outline: {
         color: [255, 255, 255], // White
         width: 1
       }
     };
-
-    let pointGraphic: esri.Graphic = new Graphic({
+  
+    const pointGraphic = new Graphic({
       geometry: point,
       symbol: simpleMarkerSymbol
     });
-
+  
     this.graphicsLayerUserPoints.add(pointGraphic);
   }
 
@@ -520,11 +536,11 @@ export class EsriMapComponent implements OnInit, OnDestroy {
   async calculateRoute(routeUrl: string) {
     const routeParams = new RouteParameters({
       stops: new FeatureSet({
-        features: this.graphicsLayerUserPoints.graphics.toArray()
+        features: this.graphicsLayerUserPoints.graphics.toArray() // Include the user and clicked point
       }),
       returnDirections: true
     });
-
+  
     try {
       const data = await route.solve(routeUrl, routeParams);
       this.displayRoute(data);
@@ -538,7 +554,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     for (const result of data.routeResults) {
       result.route.symbol = {
         type: "simple-line",
-        color: [5, 150, 255],
+        color: [5, 150, 255], // Blue route
         width: 3
       };
       this.graphicsLayerRoutes.graphics.add(result.route);
