@@ -63,7 +63,6 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     this.initializeMap().then(() => {
       this.loaded = this.view.ready;
       this.mapLoadedEvent.emit(true);
-      this.addGeolocationPin();
     });
     this.loadPointsFromFirebase();
     this.updateUserPosition();
@@ -110,9 +109,8 @@ export class EsriMapComponent implements OnInit, OnDestroy {
       console.log("ArcGIS map loaded");
       this.addRouting();
 
-      this.task2();
-      this.task3();
-      
+      this.createGraphicsLayer();
+      this.addGeolocationPin();
 
       return this.view;
     } catch (error) {
@@ -121,87 +119,9 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     }
   }
 
-  task2 () {
+  createGraphicsLayer () {
     const graphicsLayer = new GraphicsLayer();
     this.map.add(graphicsLayer);
-    const point = new Point({ //Create a point
-      longitude: -118.80657463861,
-      latitude: 34.0005930608889
-   });
-   const simpleMarkerSymbol = {
-      type: "simple-marker",
-      color: [226, 119, 40],  // Orange
-      outline: {
-          color: [255, 255, 255], // White
-          width: 1
-      }
-   };
-   
-   const pointGraphic = new Graphic({
-      geometry: point,
-      symbol: simpleMarkerSymbol
-   });
-   graphicsLayer.add(pointGraphic);
-
-  // Create a line geometry
-  const polyline = new Polyline ({
-    paths: [[
-        [-118.821527826096, 34.0139576938577], //Longitude, latitude
-        [-118.814893761649, 34.0080602407843], //Longitude, latitude
-        [-118.808878330345, 34.0016642996246]  //Longitude, latitude
-    ]]
-  });
-  
-  const simpleLineSymbol = {
-    type: "simple-line",
-    color: [226, 119, 40], // Orange
-    width: 2
-  };
-
-  const polylineGraphic = new Graphic({
-    geometry: polyline,
-    symbol: simpleLineSymbol
-  });
-  graphicsLayer.add(polylineGraphic);
-
-  // Create a polygon geometry
-  const polygon = new Polygon ({
-    rings: [[
-        [-118.818984489994, 34.0137559967283], //Longitude, latitude
-        [-118.806796597377, 34.0215816298725], //Longitude, latitude
-        [-118.791432890735, 34.0163883241613], //Longitude, latitude
-        [-118.79596686535, 34.008564864635],   //Longitude, latitude
-        [-118.808558110679, 34.0035027131376]  //Longitude, latitude
-    ]]
-  });
-
-  const simpleFillSymbol = {
-    type: "simple-fill",
-    color: [227, 139, 79, 0.8],  // Orange, opacity 80%
-    outline: {
-        color: [255, 255, 255],
-        width: 1
-    }
-  };
-
-  const popupTemplate = {
-    title: "{Name}",
-    content: "{Description}"
-  }
-  const attributes = {
-    Name: "Graphic",
-    Description: "I am a polygon"
-  }
-
-  const polygonGraphic = new Graphic({
-    geometry: polygon,
-    symbol: simpleFillSymbol,
-
-    attributes: attributes,
-    popupTemplate: popupTemplate
-
-  });
-  graphicsLayer.add(polygonGraphic);
   }
 
   addGeolocationPin(): void {
@@ -280,38 +200,6 @@ export class EsriMapComponent implements OnInit, OnDestroy {
           );
         });
       });
-  }
-
-  task3() {
-    const places = ["Choose a place type...", "Parks and Outdoors", "Coffee shop", "Gas station", "Food", "Hotel"];
-
-    const select = document.createElement("select");
-    select.setAttribute("class", "esri-widget esri-select");
-    select.setAttribute("style", "width: 175px; font-family: 'Avenir Next W00'; font-size: 1em");
-
-    places.forEach((p) => {
-      const option = document.createElement("option");
-      option.value = p;
-      option.innerHTML = p;
-      select.appendChild(option);
-    });
-
-    this.view.ui.add(select, "top-right");
-
-    const locatorUrl = "http://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer";
-
-    // Search for places in center of map
-    reactiveUtils.when(
-      () => this.view.stationary,
-      () => {
-        this.findPlaces(select.value, this.view.center);
-      }
-    );
-
-    // Listen for category changes and find places
-    select.addEventListener("change", (event) => {
-      this.findPlaces((event.target as HTMLSelectElement).value, this.view.center);
-    });
   }
 
   addPointToMap(lat: number, lng: number): void {
