@@ -154,8 +154,9 @@ export class EsriMapComponent implements OnInit, OnDestroy {
               content: `Latitude: ${latitude}, Longitude: ${longitude}`
             }
           });
-  
-          this.graphicsLayer.add(userLocationGraphic);
+          const graphicsLayerGeolocation = new GraphicsLayer();
+          graphicsLayerGeolocation.add(userLocationGraphic);
+          this.map.add(graphicsLayerGeolocation);
         },
         (error) => {
           console.error("Geolocation error:", error);
