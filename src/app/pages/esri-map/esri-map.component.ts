@@ -32,8 +32,6 @@ import FeatureSet from '@arcgis/core/rest/support/FeatureSet';
 import RouteParameters from '@arcgis/core/rest/support/RouteParameters';
 import * as route from "@arcgis/core/rest/route.js";
 
-import { AngularFireDatabase } from '@angular/fire/compat/database';
-
 @Component({
   selector: "app-esri-map",
   templateUrl: "./esri-map.component.html",
@@ -57,15 +55,13 @@ export class EsriMapComponent implements OnInit, OnDestroy {
   loaded = false;
   directionsElement: any;
 
-  constructor(private db: AngularFireDatabase) { }
+  constructor() { }
 
   ngOnInit() {
     this.initializeMap().then(() => {
       this.loaded = this.view.ready;
       this.mapLoadedEvent.emit(true);
     });
-    this.loadPointsFromFirebase();
-    this.updateUserPosition();
   }
 
   async initializeMap() {
@@ -77,7 +73,7 @@ export class EsriMapComponent implements OnInit, OnDestroy {
       };
       this.map = new WebMap(mapProperties);
 
-      const addresses = ["FARMACIA AIS PHARM 01, CALEA RAHOVEI, NR. 323"];
+      const addresses = [];
       this.addFeatureLayers(addresses);
       this.addGraphicsLayer();
 
@@ -96,9 +92,6 @@ export class EsriMapComponent implements OnInit, OnDestroy {
         //this.savePointToFirebase(point.latitude, point.longitude);
       });
 
-      this.view.on('resize', () => {
-        this.loadPointsFromFirebase();
-      })
 
       this.view.on('pointer-move', ["Shift"], (event) => {
         const point = this.view.toMap({ x: event.x, y: event.y });
@@ -224,32 +217,6 @@ export class EsriMapComponent implements OnInit, OnDestroy {
     this.view.graphics.add(pointGraphic);
   }
 
-  savePointToFirebase(lat: number, lng: number): void {
-    const pointsRef = this.db.list('points');
-    pointsRef.push({latitude: lat, longitude: lng});
-  }
-
-  loadPointsFromFirebase(): void {
-    const pointsRef = this.db.list('points');
-    pointsRef.valueChanges().subscribe(points => {
-      this.graphicsLayer.removeAll();
-      points.forEach((point: any) => {
-        this.addPointToMap(point.latitude, point.longitude);
-      })
-    })
-  }
-
-  saveUserPositionToFirebase(lat: number, lng: number): void {
-    const userPositionRef = this.db.object('user_position');
-    userPositionRef.set({latitude: lat, longitude: lng});
-  }
-
-  updateUserPosition(): void {
-    this.saveUserPositionToFirebase(this.view.center.latitude, this.view.center.longitude);
-    this.view.watch("center", () => {
-      this.saveUserPositionToFirebase(this.view.center.latitude, this.view.center.longitude);
-    });
-  }
 
   async addFeatureLayers(addresses: string[]) {
     const graphicsLayer = new GraphicsLayer();

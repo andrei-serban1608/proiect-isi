@@ -1,21 +1,32 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AngularFireDatabase } from '@angular/fire/compat/database';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss']
+  styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
   email: string = '';
   password: string = '';
 
-  // Change private to public
-  constructor(public router: Router) {}
+  constructor(public router: Router, private db: AngularFireDatabase) {}
 
   register() {
-    console.log(`Registering with ${this.email} and ${this.password}`);
-    // Logic to handle registration
-    this.router.navigate(['/login']); // Navigate to login after registration
+    const userRef = this.db.list('users');
+    userRef
+      .valueChanges()
+      .subscribe((users: any[]) => {
+        const userExists = users.some((user) => user.email === this.email);
+
+        if (userExists) {
+          alert('User already exists');
+        } else {
+          userRef.push({ email: this.email, password: this.password });
+          alert('Registration successful');
+          this.router.navigate(['/login']); // Navigate to login
+        }
+      });
   }
 }

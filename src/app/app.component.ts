@@ -9,33 +9,28 @@ interface ITab {
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  styleUrls: ['./app.component.scss'],
 })
 
 export class AppComponent {
-
-  tabs: ITab[] = [{
-    name: 'Home',
-    link: '/home'
-  }, {
-    name: 'Map',
-    link: '/map'
-  }];
+  tabs: ITab[] = [
+    { name: 'Logout', link: '/login' }
+  ];
 
   activeTab = this.tabs[0].link;
+  showMenubar = false; // Add this flag
 
   constructor(private router: Router) {
     this.router.events.subscribe((event: Event) => {
       if (event instanceof NavigationEnd) {
         this.activeTab = event.url;
+        this.showMenubar = event.url === '/map'; // Update menubar visibility
         console.log(event);
       }
     });
   }
 
-  // See app.component.html
   mapLoadedEvent(status: boolean) {
     console.log('The map loaded: ' + status);
   }
 }
-
