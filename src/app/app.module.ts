@@ -14,11 +14,23 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth'; // Added for authentication
+import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 
-import { environment } from '../environments/environment'
+import { environment } from '../environments/environment';
+
+// Newly added components
+import { LoginComponent } from './pages/login/login.component';
+import { RegisterComponent } from './pages/register/register.component';
 
 @NgModule({
-  declarations: [AppComponent, EsriMapComponent],
+  declarations: [
+    AppComponent,
+    EsriMapComponent,
+    LoginComponent, // Login Component
+    RegisterComponent // Register Component
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -28,7 +40,11 @@ import { environment } from '../environments/environment'
     MatListModule,
     FlexLayoutModule,
     AngularFireModule.initializeApp(environment.firebase, 'AngularDemoFirebase'),
-    AngularFireDatabaseModule],
+    AngularFireDatabaseModule,
+    AngularFireAuthModule, // Import for Firebase Auth
+    FormsModule,
+    ReactiveFormsModule
+  ],
   providers: [],
   bootstrap: [AppComponent]
 })
