@@ -1,9 +1,29 @@
-<div>
-    <h2>Register</h2>
-    <form (ngSubmit)="register()">
-      <input [(ngModel)]="email" name="email" type="email" placeholder="Email" required />
-      <input [(ngModel)]="password" name="password" type="password" placeholder="Password" required />
-      <button type="submit">Register</button>
-    </form>
-    <button (click)="router.navigate(['/'])">Back to Login</button>
+<div class="auth-container">
+    <div class="auth-card">
+      <h1 class="title">Bucharest Pharmacy Map</h1>
+      <h2>Register</h2>
+      <form (ngSubmit)="register()" class="auth-form">
+        <input
+          [(ngModel)]="email"
+          name="email"
+          type="email"
+          placeholder="Email"
+          required
+          class="auth-input"
+        />
+        <input
+          [(ngModel)]="password"
+          name="password"
+          type="password"
+          placeholder="Password"
+          required
+          class="auth-input"
+        />
+        <button type="submit" class="auth-button">Register</button>
+      </form>
+      <button class="auth-secondary-button" (click)="router.navigate(['/'])">
+        Back to Login
+      </button>
+    </div>
   </div>
+  

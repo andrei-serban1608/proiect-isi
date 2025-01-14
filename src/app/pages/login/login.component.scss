@@ -1,0 +1,82 @@
+/* Add a background image with a pharmacy-related theme */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('/assets/pharmacy-pattern.jpg') no-repeat center center fixed;
+    background-size: cover;
+  }
+  
+  /* Style the authentication card */
+  .auth-card {
+    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white */
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    padding: 30px 40px;
+    width: 350px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Title Styling */
+  .title {
+    font-size: 28px;
+    color: #007bff;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Form Styling */
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .auth-input {
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .auth-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    outline: none;
+  }
+  
+  /* Buttons */
+  .auth-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .auth-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+  
+  .auth-secondary-button {
+    margin-top: 10px;
+    background-color: transparent;
+    color: #007bff;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.2s;
+  }
+  
+  .auth-secondary-button:hover {
+    color: #0056b3;
+    transform: translateY(-2px);
+  }
